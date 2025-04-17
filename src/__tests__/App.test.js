@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import '@testing-library/jest-dom';
 
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import '@testing-library/jest-dom';
 import App from "../App";
 
 // Portfolio Elements
@@ -66,26 +67,63 @@ test("displays the correct links", () => {
 
 // Newsletter Form - Initial State
 test("the form includes text inputs for name and email address", () => {
-  // your test code here
+  render(<App />);
+
+  expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+  expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
 });
 
 test("the form includes three checkboxes to select areas of interest", () => {
-  // your test code here
+  render(<App />);
+
+  const checkboxes = screen.getAllByRole("checkbox");
+  expect(checkboxes).toHaveLength(3);
 });
 
 test("the checkboxes are initially unchecked", () => {
-  // your test code here
+  render(<App />);
+
+  const checkboxes = screen.getAllByRole("checkbox");
+  checkboxes.forEach(cb => expect(cb).not.toBeChecked());
 });
 
 // Newsletter Form - Adding Responses
 test("the page shows information the user types into the name and email address form fields", () => {
-  // your test code here
+  render(<App />);
+
+  const nameInput = screen.getByLabelText(/name/i);
+  const emailInput = screen.getByLabelText(/email/i);
+
+  userEvent.type(nameInput, "Larry");
+  userEvent.type(emailInput, "larry@example.com");
+
+  expect(nameInput).toHaveValue("Larry");
+  expect(emailInput).toHaveValue("larry@example.com");
 });
 
 test("checked status of checkboxes changes when user clicks them", () => {
-  // your test code here
+  render(<App />);
+
+  const codingCheckbox = screen.getByLabelText(/coding/i);
+  expect(codingCheckbox).not.toBeChecked();
+
+  userEvent.click(codingCheckbox);
+  expect(codingCheckbox).toBeChecked();
 });
 
 test("a message is displayed when the user clicks the Submit button", () => {
-  // your test code here
+  render(<App />);
+
+  // Fill out required fields
+  userEvent.type(screen.getByLabelText(/name/i), "Larry");
+  userEvent.type(screen.getByLabelText(/email/i), "larry@example.com");
+
+  // Submit the form
+  userEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+  // Assert success message appears
+  expect(
+    screen.getByText(/thank you, larry! you have successfully signed up\./i)
+  ).toBeInTheDocument();
 });
+
